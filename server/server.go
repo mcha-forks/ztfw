@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"io"
 	"net"
 	"ztfw/constants"
@@ -14,12 +13,12 @@ var log = logger.Logger
 
 type Server struct {
 	zt      *libzt.ZT
-	port    string
+	target  string
 	ipProto utils.IPProto
 }
 
-func New(zt *libzt.ZT, port string, proto utils.IPProto) Server {
-	return Server{zt: zt, ipProto: proto, port: port}
+func New(zt *libzt.ZT, target string, proto utils.IPProto) Server {
+	return Server{zt: zt, ipProto: proto, target: target}
 }
 
 func (s *Server) Listen() io.Closer {
@@ -35,6 +34,6 @@ func (s *Server) Listen() io.Closer {
 
 func (s *Server) dialLocalService() func() (net.Conn, error) {
 	return func() (net.Conn, error) {
-		return net.Dial(s.ipProto.GetName(), fmt.Sprintf("localhost:%s", s.port))
+		return net.Dial(s.ipProto.GetName(), s.target)
 	}
 }

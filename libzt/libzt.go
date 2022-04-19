@@ -2,10 +2,9 @@ package libzt
 
 /*
 #cgo CFLAGS: -I ./include
-#cgo darwin LDFLAGS: -L ${SRCDIR}/darwin/ -lzt -lstdc++ -lm
-#cgo linux LDFLAGS: -L ${SRCDIR}/linux/ -lzt -lstdc++ -lm 
 #cgo CXXFLAGS: -std=c++11
-#include "libzt.h"
+#cgo linux amd64 LDFLAGS: -L ${SRCDIR}/lib/ -lzt.amd64 -lstdc++ -lm
+#include "ZeroTierSockets.h"
 #include <netdb.h>
 */
 import "C"
@@ -13,14 +12,14 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"net"
 	"strings"
 	"syscall"
 	"unsafe"
-	"fmt"
 )
 
-const ZT_MAX_IPADDR_LEN = C.ZT_MAX_IPADDR_LEN
+const ZTS_IP_MAX_STR_LEN = C.ZTS_IP_MAX_STR_LEN
 
 type ZT struct {
 	id       string
@@ -29,13 +28,14 @@ type ZT struct {
 
 func Init(id string, homePath string) *ZT {
 	zt := &ZT{id: id, homePath: homePath}
-	C.zts_simple_start(C.CString(homePath), C.CString(id))
+	C.zts_init_from_storage(C.CString(homePath))
+	C.zts_net_join(C.CString(id))
 	return zt
 }
 
 func (zt *ZT) GetIPv4Address() net.IP {
-	address := make([]byte, ZT_MAX_IPADDR_LEN)
-	C.zts_get_ipv4_address(C.CString(zt.id), (*C.char)(unsafe.Pointer(&address[0])), C.ZT_MAX_IPADDR_LEN)
+	address := make([]byte, ZTS_IP_MAX_STR_LEN)
+	C.zts_addr_get_str(C.CString(zt.id), C.ZTS_AF_INET, (*C.char)(unsafe.Pointer(&address[0])), C.ZTS_IP_MAX_STR_LEN)
 	address = bytes.Trim(address, "\x00")
 
 	ip, _, _ := net.ParseCIDR(strings.TrimSpace(string(address)))
@@ -43,8 +43,8 @@ func (zt *ZT) GetIPv4Address() net.IP {
 }
 
 func (zt *ZT) GetIPv6Address() net.IP {
-	address := make([]byte, ZT_MAX_IPADDR_LEN)
-	C.zts_get_ipv6_address(C.CString(zt.id), (*C.char)(unsafe.Pointer(&address[0])), C.ZT_MAX_IPADDR_LEN)
+	address := make([]byte, ZTS_IP_MAX_STR_LEN)
+	C.zts_addr_get_str(C.CString(zt.id), C.ZTS_AF_INET6, (*C.char)(unsafe.Pointer(&address[0])), C.ZTS_IP_MAX_STR_LEN)
 	address = bytes.Trim(address, "\x00")
 
 	ip, _, _ := net.ParseCIDR(strings.TrimSpace(string(address)))
@@ -136,7 +136,7 @@ func htonl(number uint16) uint16 {
 }
 
 func close(fd int) int {
-	return (int)(C.zts_shutdown(cint(fd), 3))
+	return (int)(C.zts_bsd_shutdown(cint(fd), 3))
 }
 
 func socket(family int, socketType int, protocol int) int {

@@ -16,11 +16,11 @@ type Client struct {
 	zt           *libzt.ZT
 	networkProto utils.IPProto
 	connectTo    string
-	port         string
+	target       string
 }
 
-func New(zt *libzt.ZT, ipToConnectTo string, port string, networkProto utils.IPProto) Client {
-	return Client{zt: zt, networkProto: networkProto, port: port, connectTo: ipToConnectTo}
+func New(zt *libzt.ZT, ipToConnectTo string, target string, networkProto utils.IPProto) Client {
+	return Client{zt: zt, networkProto: networkProto, target: target, connectTo: ipToConnectTo}
 }
 
 func (c *Client) ListenAndSync() io.Closer {
@@ -37,7 +37,7 @@ func (c *Client) listenAndSyncUDP() io.Closer {
 }
 
 func (c *Client) listenAndSyncTCP() io.Closer {
-	ln, _ := net.Listen(c.networkProto.GetName(), fmt.Sprintf(":%s", c.port))
+	ln, _ := net.Listen(c.networkProto.GetName(), fmt.Sprintf(":%s", c.target))
 	go utils.Sync(ln.Accept, c.dialRemoteThroughTunnel(), true)
 	return ln
 }
@@ -54,7 +54,7 @@ func (c *Client) dialRemoteThroughTunnel() func() (net.Conn, error) {
 func (c *Client) listenUDP() func() (net.Conn, error) {
 	fmt.Println("return Listening....")
 	return func() (net.Conn, error) {
-		addr, _ := net.ResolveUDPAddr(c.networkProto.GetName(), fmt.Sprintf(":%s", c.port))
+		addr, _ := net.ResolveUDPAddr(c.networkProto.GetName(), c.target)
 		fmt.Println("Listening....")
 		conn, err := net.ListenUDP(c.networkProto.GetName(), addr)
 		return &utils.DuplexUDPConnection{UDPConn: conn}, err

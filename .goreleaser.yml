@@ -1,0 +1,30 @@
+project_name: ztfw
+builds:
+  - env: [CGO_ENABLED=1]
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - "386"
+      - "amd64"
+      - "arm"
+      - "arm64"
+      - "mips"
+    gomips:
+      - hardfloat
+      - softfloat
+
+    mod_timestamp: '{{ .CommitTimestamp }}'
+dockers:
+- image_templates: ["ghcr.io/traidento/ztfw:{{ .Version }}"]
+  use: buildx
+  dockerfile: Dockerfile
+  build_flag_templates:
+  - --label=org.opencontainers.image.title={{ .ProjectName }}
+  - --label=org.opencontainers.image.description=Userspace libzt wrapper port forwarder
+  - --label=org.opencontainers.image.url=https://github.com/traidento/relaygram
+  - --label=org.opencontainers.image.source=https://github.com/traidento/relaygram
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2022-04-19T12:24:30+08:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - --label=org.opencontainers.image.licenses=MIT
