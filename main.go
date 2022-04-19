@@ -1,13 +1,15 @@
 package main
 
 import (
-	"github.com/selvakn/libzt"
-	"gopkg.in/alecthomas/kingpin.v2"
 	"io"
-	"p2p-port-forward/client"
-	"p2p-port-forward/logger"
-	"p2p-port-forward/server"
-	"p2p-port-forward/utils"
+	"ztfw/client"
+	"ztfw/logger"
+	"ztfw/server"
+	"ztfw/utils"
+
+	"ztfw/libzt"
+
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (

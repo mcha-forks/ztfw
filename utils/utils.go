@@ -3,7 +3,7 @@ package utils
 import (
 	"os"
 	"os/signal"
-	"p2p-port-forward/logger"
+	"ztfw/logger"
 )
 
 var log = logger.Logger

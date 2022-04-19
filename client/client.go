@@ -2,12 +2,12 @@ package client
 
 import (
 	"fmt"
-	"github.com/selvakn/libzt"
 	"io"
 	"net"
-	"p2p-port-forward/constants"
-	"p2p-port-forward/logger"
-	"p2p-port-forward/utils"
+	"ztfw/constants"
+	"ztfw/libzt"
+	"ztfw/logger"
+	"ztfw/utils"
 )
 
 var log = logger.Logger
